@@ -2,6 +2,24 @@
 
 from params_proto import PrefixProto, ParamsProto
 
+class RunnerArgs(PrefixProto, cli=False):
+    # runner
+    algorithm_class_name = 'RMA'
+    num_steps_per_env = 24  # per iteration
+    max_iterations = 1500  # number of policy updates
+
+    # logging
+    save_interval = 400  # check for potential saves every this many iterations
+    save_video_interval = 100
+    log_freq = 10
+
+    # load and resume
+    resume = False
+    load_run = -1  # -1 = last run
+    checkpoint = -1  # -1 = last saved model
+    resume_path = None  # updated from load_run and chkpt
+    resume_curriculum = True
+
 
 class Cfg(PrefixProto, cli=False):
     class env(PrefixProto, cli=False):
@@ -419,3 +437,4 @@ class Cfg(PrefixProto, cli=False):
             max_gpu_contact_pairs = 2 ** 23  # 2**24 -> needed for 8000 envs and more
             default_buffer_size_multiplier = 5
             contact_collection = 2  # 0: never, 1: last sub-step, 2: all sub-steps (default=2)
+

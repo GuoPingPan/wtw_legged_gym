@@ -16,6 +16,7 @@ class VelocityTrackingEasyEnv(LeggedRobot):
 
         sim_params = gymapi.SimParams()
         gymutil.parse_sim_config(vars(cfg.sim), sim_params)
+        
         super().__init__(cfg, sim_params, physics_engine, sim_device, headless, eval_cfg, initial_dynamics_dict)
 
 

@@ -5,7 +5,8 @@ import os
 
 import torch
 from ml_logger import logger
-from params_proto import PrefixProto
+
+from go1_gym.envs.base.legged_robot_config import RunnerArgs
 
 from .actor_critic import ActorCritic
 from .rollout_storage import RolloutStorage
@@ -40,32 +41,14 @@ class DataCaches:
 caches = DataCaches(1)
 
 
-class RunnerArgs(PrefixProto, cli=False):
-    # runner
-    algorithm_class_name = 'RMA'
-    num_steps_per_env = 24  # per iteration
-    max_iterations = 1500  # number of policy updates
-
-    # logging
-    save_interval = 400  # check for potential saves every this many iterations
-    save_video_interval = 100
-    log_freq = 10
-
-    # load and resume
-    resume = False
-    load_run = -1  # -1 = last run
-    checkpoint = -1  # -1 = last saved model
-    resume_path = None  # updated from load_run and chkpt
-    resume_curriculum = True
-
-
 class Runner:
 
-    def __init__(self, env, device='cpu'):
+    def __init__(self, env, runner_args: RunnerArgs, device='cpu'):
         from .ppo import PPO
 
         self.device = device
         self.env = env
+        self.runner_args = runner_args
 
         actor_critic = ActorCritic(self.env.num_obs,
                                       self.env.num_privileged_obs,
@@ -73,16 +56,19 @@ class Runner:
                                       self.env.num_actions,
                                       ).to(self.device)
 
-        if RunnerArgs.resume:
+        if self.runner_args.resume:
             # load pretrained weights from resume_path
             from ml_logger import ML_Logger
             loader = ML_Logger(root="http://escher.csail.mit.edu:8080",
-                               prefix=RunnerArgs.resume_path)
+                               prefix=self.runner_args.resume_path)
+            
+            # NOTE 自动加载最新的模型，重点是 resume_path 
             weights = loader.load_torch("checkpoints/ac_weights_last.pt")
             actor_critic.load_state_dict(state_dict=weights)
 
-            if hasattr(self.env, "curricula") and RunnerArgs.resume_curriculum:
+            if hasattr(self.env, "curricula") and self.runner_args.resume_curriculum:
                 # load curriculum state
+                # TODO distribution.pkl 是什么？
                 distributions = loader.load_pkl("curriculum/distribution.pkl")
                 distribution_last = distributions[-1]["distribution"]
                 gait_names = [key[8:] if key.startswith("weights_") else None for key in distribution_last.keys()]
@@ -91,7 +77,7 @@ class Runner:
                     print(gait_name)
 
         self.alg = PPO(actor_critic, device=self.device)
-        self.num_steps_per_env = RunnerArgs.num_steps_per_env
+        self.num_steps_per_env = self.runner_args.num_steps_per_env
 
         # init storage and model
         self.alg.init_storage(self.env.num_train_envs, self.num_steps_per_env, [self.env.num_obs],
@@ -219,16 +205,16 @@ class Runner:
                 mean_adaptation_module_test_loss=mean_adaptation_module_test_loss
             )
 
-            if RunnerArgs.save_video_interval:
+            if self.runner_args.save_video_interval:
                 self.log_video(it)
 
             self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
-            if logger.every(RunnerArgs.log_freq, "iteration", start_on=1):
+            if logger.every(self.runner_args.log_freq, "iteration", start_on=1):
                 # if it % Config.log_freq == 0:
                 logger.log_metrics_summary(key_values={"timesteps": self.tot_timesteps, "iterations": it})
                 logger.job_running()
 
-            if it % RunnerArgs.save_interval == 0:
+            if it % self.runner_args.save_interval == 0:
                 with logger.Sync():
                     logger.torch_save(self.alg.actor_critic.state_dict(), f"checkpoints/ac_weights_{it:06d}.pt")
                     logger.duplicate(f"checkpoints/ac_weights_{it:06d}.pt", f"checkpoints/ac_weights_last.pt")
@@ -275,7 +261,7 @@ class Runner:
 
 
     def log_video(self, it):
-        if it - self.last_recording_it >= RunnerArgs.save_video_interval:
+        if it - self.last_recording_it >= self.runner_args.save_video_interval:
             self.env.start_recording()
             if self.env.num_eval_envs > 0:
                 self.env.start_recording_eval()

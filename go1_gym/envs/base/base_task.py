@@ -32,6 +32,7 @@ class BaseTask(gym.Env):
             self.device = 'cpu'
 
         # graphics device for rendering, -1 for no rendering
+        # NOTE 这里也没有将 headless 设置为0，所以 headless 情况也能记录视频
         self.graphics_device_id = self.sim_device_id
         if self.headless == True:
             self.graphics_device_id = self.sim_device_id
