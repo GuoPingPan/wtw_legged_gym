@@ -101,21 +101,21 @@ class Go1ArmCfg(Cfg):
         manip_energy = -0.004
         loco_energy = -0.00005
         alive = 1.
+        base_height = -0.05
 
-        torques = -0.
+        torques = -0.0001
         action_rate = -0.
-        dof_pos_limits = -0.
-        dof_acc = -0.
+        dof_pos_limits = -0
 
         tracking_ang_vel = 0. # TODO
         tracking_lin_vel = 0. # TODO
 
         feet_contact_forces = 0.0
         feet_slip = -0.0 # TODO
-        action_smoothness_1 = -0.
-        action_smoothness_2 = -0.
-        dof_vel = -0.
-        dof_pos = -0.
+        # action_smoothness_1 = -0.1
+        # action_smoothness_2 = -0.1
+        dof_vel = -1e-4
+        dof_pos = -0.0
         jump = 0.0 # TODO
         base_height = 0.0
         estimation_bonus = 0.0
@@ -128,13 +128,13 @@ class Go1ArmCfg(Cfg):
         orientation_control = -0.0 # TODO
         tracking_stance_width = -0.0 
         tracking_stance_length = -0.0 
-        lin_vel_z = -0.
-        ang_vel_xy = -0.
-        feet_air_time = 0.
-        hop_symmetry = 0.
+        lin_vel_z = -0.00
+        ang_vel_xy = -0.000
+        feet_air_time = 0.0
+        hop_symmetry = 0.0
         tracking_contacts_shaped_force = 0.0 # TODO
         tracking_contacts_shaped_vel = 0.0 # TODO
-        collision = -0.
+        collision = -5.0
 
     class terrain(Cfg.terrain):
         measure_heights = False
@@ -197,7 +197,7 @@ class Go1ArmCfg(Cfg):
         priv_observe_contact_forces = False
         priv_observe_foot_displacement = False
         priv_observe_gravity_transformed_foot_displacement = False
-        num_privileged_obs = 2
+        num_privileged_obs = 15 # TODO
         num_observation_history = 30
         observe_two_prev_actions = True
         observe_yaw = False
@@ -212,13 +212,15 @@ class Go1ArmCfg(Cfg):
         # TODO 
         lin_vel_x = [0, 0.9] # 只有向前的速度？
         ang_vel_yaw = [-1.0, 1.0]
-        # l = [0.5, 0.52]
-        # p = [np.pi /3 - 0.05, np.pi /3 ]
-        # y = [-np.pi /3 - 0.05, -np.pi /3 ]
-        l = [0.2, 0.7]
-        p = [-2. *np.pi /5 , 2.*np.pi/5]
-        y = [-3. *np.pi /5 , 3.*np.pi/5]
-        T_traj = [1., 3.]
+        l = [0.5, 0.52]
+        p = [np.pi /3 - 0.05, np.pi /3 ]
+        y = [- 0.05, 0.]
+        T_traj = [4.9, 5.]
+
+        # l = [0.2, 0.7]
+        # p = [-2. *np.pi /5 , 2.*np.pi/5]
+        # y = [-3. *np.pi /5 , 3.*np.pi/5]
+        # T_traj = [1., 3.]
 
         heading_command = False
         command_curriculum = False # TODO

@@ -211,6 +211,16 @@ class Go1Arm(LeggedRobot):
         super().compute_reward()
         self.command_sums["ang_vel_residual"] += (self.base_ang_vel[:, 2] - self.commands[:, 1]) ** 2
 
+    def compute_observations(self):
+        super().compute_observations()
+
+        # TODO
+        self.privileged_obs_buf = torch.cat((self.privileged_obs_buf, self.end_effector_state), dim=1)
+        self.next_privileged_obs_buf = torch.cat((self.next_privileged_obs_buf, self.end_effector_state), dim=1)
+        
+        assert self.privileged_obs_buf.shape[
+            1] == self.cfg.env.num_privileged_obs, f"num_privileged_obs ({self.cfg.env.num_privileged_obs}) != the number of privileged observations ({self.privileged_obs_buf.shape[1]}), you will discard data from the student!"
+
     def _post_physics_step_callback(self):
         # teleport robots to prevent falling off the edge
         self._call_train_eval(self._teleport_robots, torch.arange(self.num_envs, device=self.device))
