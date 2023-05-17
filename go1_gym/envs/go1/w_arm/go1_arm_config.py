@@ -71,6 +71,7 @@ class Go1ArmCfg(Cfg):
         foot_name = "foot"
         penalize_contacts_on = ["thigh", "calf"]
         terminate_after_contacts_on = ["base"]
+        end_effector_link = ["link6"] # TODO
         self_collisions = 0  # 1 to disable, 0 to enable...bitwise filter
         flip_visual_attachments = False
         fix_base_link = False
@@ -86,6 +87,12 @@ class Go1ArmCfg(Cfg):
         only_positive_rewards_ji22_style = False
         sigma_rew_neg = 0.02
 
+        use_terminal_foot_height = False
+        use_terminal_body_height = True
+        terminal_body_height = 0.18
+        use_terminal_roll_pitch = True
+        terminal_body_ori = 1.6
+
     class reward_scales(Cfg.reward_scales):
         # TODO
         manip_commands_tracking = 0.5
@@ -95,19 +102,20 @@ class Go1ArmCfg(Cfg):
         loco_energy = -0.00005
         alive = 1.
 
-        torques = -0.0001
-        action_rate = -0.01
-        dof_pos_limits = -10.0
+        torques = -0.
+        action_rate = -0.
+        dof_pos_limits = -0.
+        dof_acc = -0.
 
         tracking_ang_vel = 0. # TODO
         tracking_lin_vel = 0. # TODO
 
         feet_contact_forces = 0.0
         feet_slip = -0.0 # TODO
-        action_smoothness_1 = -0.1
-        action_smoothness_2 = -0.1
-        dof_vel = -1e-4
-        dof_pos = -0.0
+        action_smoothness_1 = -0.
+        action_smoothness_2 = -0.
+        dof_vel = -0.
+        dof_pos = -0.
         jump = 0.0 # TODO
         base_height = 0.0
         estimation_bonus = 0.0
@@ -120,13 +128,13 @@ class Go1ArmCfg(Cfg):
         orientation_control = -0.0 # TODO
         tracking_stance_width = -0.0 
         tracking_stance_length = -0.0 
-        lin_vel_z = -0.02
-        ang_vel_xy = -0.001
-        feet_air_time = 0.0
-        hop_symmetry = 0.0
+        lin_vel_z = -0.
+        ang_vel_xy = -0.
+        feet_air_time = 0.
+        hop_symmetry = 0.
         tracking_contacts_shaped_force = 0.0 # TODO
         tracking_contacts_shaped_vel = 0.0 # TODO
-        collision = -5.0
+        collision = -0.
 
     class terrain(Cfg.terrain):
         measure_heights = False
@@ -149,11 +157,7 @@ class Go1ArmCfg(Cfg):
         center_robots = True
         center_span = 4
         horizontal_scale = 0.10
-        use_terminal_foot_height = False
-        use_terminal_body_height = True
-        terminal_body_height = 0.05
-        use_terminal_roll_pitch = True
-        terminal_body_ori = 1.6
+
 
     class normalization(Cfg.normalization):
         friction_range = [0, 1]
@@ -199,7 +203,7 @@ class Go1ArmCfg(Cfg):
         observe_yaw = False
         num_observations = 73 # TODO
         num_scalar_observations = 70
-        observe_gait_commands = False
+        observe_gait_commands = False # TODO
         observe_timing_parameter = False
         observe_clock_inputs = True
 
@@ -225,7 +229,9 @@ class Go1ArmCfg(Cfg):
         distributional_commands = True
         num_commands = 6 # TODO
         num_commands_arm = 3 # TODO
+
         resampling_time = 10.
+
         lin_vel_x = [-1.0, 1.0]
         lin_vel_y = [-0.6, 0.6]
         ang_vel_yaw = [-1.0, 1.0]
@@ -240,6 +246,7 @@ class Go1ArmCfg(Cfg):
         body_roll_range = [-0.0, 0.0]
         stance_width_range = [0.10, 0.45]
         stance_length_range = [0.35, 0.45]
+
         limit_vel_x = [-5.0, 5.0]
         limit_vel_y = [-0.6, 0.6]
         limit_vel_yaw = [-5.0, 5.0]
@@ -254,6 +261,7 @@ class Go1ArmCfg(Cfg):
         limit_body_roll = [-0.0, 0.0]
         limit_stance_width = [0.10, 0.45]
         limit_stance_length = [0.35, 0.45]
+
         num_bins_vel_x = 21
         num_bins_vel_y = 1
         num_bins_vel_yaw = 21
@@ -267,6 +275,7 @@ class Go1ArmCfg(Cfg):
         num_bins_body_roll = 1
         num_bins_body_pitch = 1
         num_bins_stance_width = 1
+
         exclusive_phase_offset = False
         pacing_offset = False
         binary_phases = True

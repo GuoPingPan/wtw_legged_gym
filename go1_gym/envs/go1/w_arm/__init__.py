@@ -40,10 +40,10 @@ class Go1Arm(LeggedRobot):
         for _ in range(self.cfg.control.decimation):
             self.torques = self._compute_torques(self.actions).view(self.torques.shape)
             self.gym.set_dof_actuation_force_tensor(self.sim, gymtorch.unwrap_tensor(self.torques))
-            self.gym.simulate(self.sim)
-            # if self.device == 'cpu':
             if self.cfg.env.keep_arm_fixed:
                 self._keep_arm_fixed()
+            self.gym.simulate(self.sim)
+            # if self.device == 'cpu':
             self.gym.fetch_results(self.sim, True)
             self.gym.refresh_dof_state_tensor(self.sim)
         self.post_physics_step()
@@ -56,8 +56,8 @@ class Go1Arm(LeggedRobot):
         return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras
 
     def _keep_arm_fixed(self):
-        self.dof_pos[:, 15:] = self.default_dof_pos[:, 15:]
-        self.dof_vel[:, 15:] = 0.
+        self.dof_pos[:, self.num_actions:] = self.default_dof_pos[:, self.num_actions:]
+        self.dof_vel[:, self.num_actions:] = 0.
 
         # HACK(pgp) fixed last 3 DOFs of arm
         self.gym.set_dof_state_tensor(self.sim,
@@ -79,6 +79,7 @@ class Go1Arm(LeggedRobot):
         Returns:
             [torch.Tensor]: Torques sent to the simulation
         """
+
         # pd controller
         actions_scaled = actions[:, :self.num_actions] * self.cfg.control.action_scale
         actions_scaled[:, [0, 3, 6, 9]] *= self.cfg.control.hip_scale_reduction  # scale down hip flexion range
@@ -106,13 +107,14 @@ class Go1Arm(LeggedRobot):
                     self.joint_pos_target - self.dof_pos + self.motor_offsets) - self.d_gains * self.Kd_factors * self.dof_vel
         else:
             raise NameError(f"Unknown controller type: {control_type}")
-
+        # import ipdb; ipdb.set_trace()
         # torques = torques * self.motor_strengths
         # # TODO(pgp) pad torques with 0 in dim1 from num_actions to num_dofs
         # torques_temp = torch.zeros((self.num_envs, self.num_dofs), device=self.device)
         # torques_temp[..., :self.num_actions] = torques
         # torques = torques_temp
         torques[:, self.num_actions:] = 0.0
+        # print("toques: ", torques[0])
         return torch.clip(torques, -self.torque_limits, self.torque_limits)
 
     # ----------------------------------------
@@ -128,7 +130,10 @@ class Go1Arm(LeggedRobot):
             self.default_dof_pos[i] = angle
             found = False
 
-            if i >= self.num_actions: break
+            if i >= self.num_actions: 
+                self.p_gains[i] = 0.
+                self.d_gains[i] = 0.
+                continue
 
             for dof_name in self.cfg.control.stiffness.keys():
                 if dof_name in name:
@@ -137,6 +142,7 @@ class Go1Arm(LeggedRobot):
                     self.d_gains[i] = self.cfg.control.damping_leg[dof_name] \
                         if i < self.num_actions_loco else self.cfg.control.damping_arm[dof_name]  # 阻尼，[N*m*s/rad]
                     found = True
+
             if not found:
                 self.p_gains[i] = 0.
                 self.d_gains[i] = 0.
@@ -145,10 +151,7 @@ class Go1Arm(LeggedRobot):
         self.default_dof_pos = self.default_dof_pos.unsqueeze(0) # [1,20]
         
         # 加入DWB的约束
-        rigid_body_state = self.gym.acquire_rigid_body_state_tensor(self.sim)
-        self.gym.refresh_rigid_body_state_tensor(self.sim)
-        self.rigid_body_state_tensor = gymtorch.wrap_tensor(rigid_body_state).view(self.num_envs, self.num_bodies, -1)
-        self.end_effector_state = self.rigid_body_state_tensor[:, 22] # link6
+        self.end_effector_state = self.rigid_body_state.view(self.num_envs, self.num_bodies, 13)[:, 22] # link6
 
         self.T_trajs = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False) # command 时间
         self.arm_commands_start = torch.zeros(self.num_envs, self.cfg.commands.num_commands_arm, dtype=torch.float, device=self.device, requires_grad=False) 
@@ -168,7 +171,7 @@ class Go1Arm(LeggedRobot):
         # remove zero scales + multiply non-zero ones by dt
         for key in list(self.reward_scales.keys()):
             scale = self.reward_scales[key]
-            print(key, scale)
+            # print(key, scale)
             if scale == 0:
                 self.reward_scales.pop(key)
             else:
@@ -244,7 +247,6 @@ class Go1Arm(LeggedRobot):
             self._call_train_eval(self._randomize_rigid_body_props, env_ids)
             self._call_train_eval(self.refresh_actor_rigid_shape_props, env_ids)
 
-
     def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_net_contact_force_tensor(self.sim)
@@ -269,7 +271,7 @@ class Go1Arm(LeggedRobot):
         self.foot_positions = self.rigid_body_state.view(self.num_envs, self.num_bodies, 13)[:, self.feet_indices,
                               0:3]
         # TODO(pgp)
-        self.end_effector_state[:] = self.rigid_body_state_tensor[:, 22]
+        self.end_effector_state[:] = self.rigid_body_state.view(self.num_envs, self.num_bodies, 13)[:, 22]
 
         self._post_physics_step_callback()
 

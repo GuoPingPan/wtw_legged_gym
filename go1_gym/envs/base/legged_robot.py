@@ -1169,6 +1169,9 @@ class LeggedRobot(BaseTask):
                                7:10]
         self.foot_positions = self.rigid_body_state.view(self.num_envs, self.num_bodies, 13)[:, self.feet_indices,
                               0:3]
+        
+        # import ipdb; ipdb.set_trace()
+
         self.prev_base_pos = self.base_pos.clone()
         self.prev_foot_velocities = self.foot_velocities.clone()
 

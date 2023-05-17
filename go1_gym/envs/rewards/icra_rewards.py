@@ -28,8 +28,6 @@ class ICRARewards:
 
     def _reward_manip_commands_tracking(self):
         lpy = self.env._get_lpy_in_base_coord(torch.arange(self.env.num_envs, device=self.env.device))
-        # print("lpys: ", lpy)
-        # print("self.env.commands ", self.env.commands)
         lpy_error = torch.sum(torch.abs(lpy - self.env.commands[:, 2:5]), dim=1)
 
         # print("lpy_error: ", torch.exp(-lpy_error))
@@ -37,26 +35,19 @@ class ICRARewards:
         return torch.exp(-lpy_error)
 
     def _reward_loco_angular_commands_tracking(self):
-        # rpy = quat_to_euler(self.env.base_quat)
-        # yaw = rpy[..., 2]
-
-        # forward = quat_apply(self.env.base_quat, self.env.forward_vec)
-        # yaw = torch.atan2(forward[:, 1], forward[:, 0])
 
         yaw_vel_error = torch.abs(self.env.base_ang_vel[:, -1] - self.env.commands[:, 1])
 
-        # print("yaw_vel_error: ", torch.exp(-5*yaw_vel_error))
+        # print("yaw_vel_error: ", torch.exp(-yaw_vel_error))
 
-
-        return torch.exp(-5*yaw_vel_error)
+        return torch.exp(-yaw_vel_error)
 
     def _reward_loco_velocity_commands_tracking(self):
         vx_error = torch.abs(self.env.base_lin_vel[:, 0] - self.env.commands[:, 0])
-        # TODO add scale 0.1~0.9
         
+        # TODO add scale 0.1~0.9
         # print("vx_error: ", vx_error)
 
-        # return torch.exp(-5*vx_error)
         return vx_error
 
 
