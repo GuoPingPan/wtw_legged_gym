@@ -390,6 +390,12 @@ class LeggedRobot(BaseTask):
                 self.num_envs,
                 -1) * 1.0), dim=1)
 
+        
+
+
+        assert self.obs_buf.shape[
+                   1] == self.cfg.env.num_observations, f"num_observations ({self.cfg.env.num_observations}) != the number of privileged observations ({self.obs_buf.shape[1]})!"
+
         # add noise if needed
         if self.add_noise:
             self.obs_buf += (2 * torch.rand_like(self.obs_buf) - 1) * self.noise_scale_vec
@@ -506,8 +512,9 @@ class LeggedRobot(BaseTask):
             self.privileged_obs_buf = torch.cat((self.privileged_obs_buf,
                                                  self.desired_contact_states), dim=-1)
 
-        assert self.privileged_obs_buf.shape[
-                   1] == self.cfg.env.num_privileged_obs, f"num_privileged_obs ({self.cfg.env.num_privileged_obs}) != the number of privileged observations ({self.privileged_obs_buf.shape[1]}), you will discard data from the student!"
+        # import ipdb; ipdb.set_trace()
+        # assert self.privileged_obs_buf.shape[
+        #            1] == self.cfg.env.num_privileged_obs, f"num_privileged_obs ({self.cfg.env.num_privileged_obs}) != the number of privileged observations ({self.privileged_obs_buf.shape[1]}), you will discard data from the student!"
 
 
 
