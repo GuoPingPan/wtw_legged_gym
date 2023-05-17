@@ -15,6 +15,25 @@ from go1_gym.utils.math_utils import quat_apply_yaw, wrap_to_pi, get_scale_shift
 from go1_gym.utils.terrain import Terrain
 from .legged_robot_config import Cfg
 
+def class_to_dict(obj) -> dict:
+    if not  hasattr(obj,"__dict__"):
+        return obj
+    result = {}
+    for key in dir(obj):
+        if key.startswith("_"):
+            continue
+        element = []
+        val = getattr(obj, key)
+        if isinstance(val, list):
+            for item in val:
+                element.append(class_to_dict(item))
+        else:
+            element = class_to_dict(val)
+        result[key] = element
+    if 'copy' in result:
+        result.pop('copy')
+    return result
+
 
 class LeggedRobot(BaseTask):
     def __init__(self, cfg: Cfg, sim_params, physics_engine, sim_device, headless, eval_cfg=None,
@@ -529,7 +548,7 @@ class LeggedRobot(BaseTask):
 
     # ------------- Callbacks --------------
     def _call_train_eval(self, func, env_ids):
-
+        ''' 没有返回值的函数默认返回 None '''
         env_ids_train = env_ids[env_ids < self.num_train_envs]
         env_ids_eval = env_ids[env_ids >= self.num_train_envs]
 
@@ -1394,6 +1413,7 @@ class LeggedRobot(BaseTask):
         # remove zero scales + multiply non-zero ones by dt
         for key in list(self.reward_scales.keys()):
             scale = self.reward_scales[key]
+            print(key, scale)
             if scale == 0:
                 self.reward_scales.pop(key)
             else:
@@ -1716,9 +1736,12 @@ class LeggedRobot(BaseTask):
     def _parse_cfg(self, cfg):
         self.dt = self.cfg.control.decimation * self.sim_params.dt
         self.obs_scales = self.cfg.obs_scales
-        self.reward_scales = vars(self.cfg.reward_scales)
-        self.curriculum_thresholds = vars(self.cfg.curriculum_thresholds)
-        cfg.command_ranges = vars(cfg.commands)
+        self.reward_scales = class_to_dict(self.cfg.reward_scales)
+        self.curriculum_thresholds = class_to_dict(self.cfg.curriculum_thresholds)
+        
+        # import ipdb; ipdb.set_trace()
+        # NOTE 天坑，vars无法将继承的成员变量也进行输出
+        cfg.command_ranges = class_to_dict(cfg.commands)
         if cfg.terrain.mesh_type not in ['heightfield', 'trimesh']:
             cfg.terrain.curriculum = False
         max_episode_length_s = cfg.env.episode_length_s

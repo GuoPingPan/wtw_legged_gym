@@ -2,7 +2,7 @@ import isaacgym
 assert isaacgym
 import torch
 
-from go1_gym.envs.go1.go1_config import Go1Cfg, Go1RunnerArgs
+from go1_gym.envs.go1.wo_arm.go1_config import Go1Cfg, Go1RunnerArgs
 from go1_gym.envs.go1.velocity_tracking import VelocityTrackingEasyEnv
 
 from ml_logger import logger
