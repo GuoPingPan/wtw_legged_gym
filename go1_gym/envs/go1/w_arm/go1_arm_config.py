@@ -65,6 +65,10 @@ class Go1ArmCfg(Cfg):
         hip_scale_reduction = 0.5
         # decimation: Number of control action updates @ sim DT per policy DT
         decimation = 4
+        stiffness_leg = {'joint': 50.}  # [N*m/rad]
+        damping_leg = {'joint': 1.}  # [N*m*s/rad]
+        stiffness_arm = {'joint': 5.}  # [N*m/rad]
+        damping_arm = {'joint': 0.5}  # [N*m*s/rad]
 
     class asset(Cfg.asset):
         file = '{MINI_GYM_ROOT_DIR}/resources/robots/go1_arm/urdf/go1_arm.urdf'
@@ -97,13 +101,14 @@ class Go1ArmCfg(Cfg):
         # TODO
         manip_commands_tracking = 0.5
         loco_angular_commands_tracking = 0.15
-        loco_velocity_commands_tracking = -0.5
+        loco_velocity_commands_tracking = 0.5
         manip_energy = -0.004
         loco_energy = -0.00005
         alive = 1.
-        base_height = -0.05
+        base_height = -0.0
+        dof_acc = -0.
 
-        torques = -0.0001
+        torques = -0.000
         action_rate = -0.
         dof_pos_limits = -0
 
@@ -114,7 +119,7 @@ class Go1ArmCfg(Cfg):
         feet_slip = -0.0 # TODO
         # action_smoothness_1 = -0.1
         # action_smoothness_2 = -0.1
-        dof_vel = -1e-4
+        dof_vel = -0.
         dof_pos = -0.0
         jump = 0.0 # TODO
         base_height = 0.0
@@ -134,7 +139,7 @@ class Go1ArmCfg(Cfg):
         hop_symmetry = 0.0
         tracking_contacts_shaped_force = 0.0 # TODO
         tracking_contacts_shaped_vel = 0.0 # TODO
-        collision = -5.0
+        collision = -.0
 
     class terrain(Cfg.terrain):
         measure_heights = False
@@ -214,8 +219,8 @@ class Go1ArmCfg(Cfg):
         ang_vel_yaw = [-1.0, 1.0]
         l = [0.5, 0.52]
         p = [np.pi /3 - 0.05, np.pi /3 ]
-        y = [- 0.05, 0.]
-        T_traj = [4.9, 5.]
+        y = [-0.05, 0.]
+        T_traj = [2.9, 3.]
 
         # l = [0.2, 0.7]
         # p = [-2. *np.pi /5 , 2.*np.pi/5]
@@ -306,7 +311,7 @@ class Go1ArmCfg(Cfg):
         friction_range = [0.1, 3.0]
         randomize_restitution = True
         restitution_range = [0.0, 0.4]
-        randomize_base_mass = True
+        randomize_base_mass = False # TODO
         added_mass_range = [-1.0, 3.0]
         randomize_gravity = True
         gravity_range = [-1.0, 1.0]

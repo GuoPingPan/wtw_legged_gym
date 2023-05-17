@@ -227,12 +227,8 @@ class Cfg(PrefixProto, cli=False):
     class control(PrefixProto, cli=False):
         control_type = 'actuator_net' #'P'  # P: position, V: velocity, T: torques
         # PD Drive parameters:
-        # stiffness = {'joint_a': 10.0, 'joint_b': 15.}  # [N*m/rad]
-        # damping = {'joint_a': 1.0, 'joint_b': 1.5}  # [N*m*s/rad]
-        stiffness_leg = {'joint': 20.}  # [N*m/rad]
-        damping_leg = {'joint': 1.}  # [N*m*s/rad]
-        stiffness_arm = {'joint': 5.}  # [N*m/rad]
-        damping_arm = {'joint': 0.5}  # [N*m*s/rad]
+        stiffness = {'joint_a': 10.0, 'joint_b': 15.}  # [N*m/rad]
+        damping = {'joint_a': 1.0, 'joint_b': 1.5}  # [N*m*s/rad]
         # action scale: target angle = actionScale * action + defaultAngle
         action_scale = 0.5
         hip_scale_reduction = 1.0

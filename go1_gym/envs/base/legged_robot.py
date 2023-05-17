@@ -944,7 +944,7 @@ class LeggedRobot(BaseTask):
             [torch.Tensor]: Torques sent to the simulation
         """
         # pd controller
-        actions_scaled = actions[:, :12] * self.cfg.control.action_scale
+        actions_scaled = actions * self.cfg.control.action_scale
         actions_scaled[:, [0, 3, 6, 9]] *= self.cfg.control.hip_scale_reduction  # scale down hip flexion range
 
         if self.cfg.domain_rand.randomize_lag_timesteps:
