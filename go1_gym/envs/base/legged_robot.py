@@ -509,6 +509,8 @@ class LeggedRobot(BaseTask):
         assert self.privileged_obs_buf.shape[
                    1] == self.cfg.env.num_privileged_obs, f"num_privileged_obs ({self.cfg.env.num_privileged_obs}) != the number of privileged observations ({self.privileged_obs_buf.shape[1]}), you will discard data from the student!"
 
+
+
     def create_sim(self):
         """ Creates simulation, terrain and evironments
         """
@@ -956,8 +958,8 @@ class LeggedRobot(BaseTask):
             self.joint_vel_last_last = torch.clone(self.joint_vel_last)
             self.joint_vel_last = torch.clone(self.joint_vel)
         elif control_type == "P":
-            torques = self.p_gains * self.Kp_factors * (
-                    self.joint_pos_target - self.dof_pos + self.motor_offsets) - self.d_gains * self.Kd_factors * self.dof_vel
+            torques = self.p_gains[:, :self.num_actions] * self.Kp_factors[:, :self.num_actions] * (
+                    self.joint_pos_target - self.dof_pos[:, :self.num_actions] + self.motor_offsets[:, :self.num_actions]) - self.d_gains[:, :self.num_actions] * self.Kd_factors[:, :self.num_actions] * self.dof_vel[:, :self.num_actions]
         else:
             raise NameError(f"Unknown controller type: {control_type}")
 
@@ -1413,7 +1415,7 @@ class LeggedRobot(BaseTask):
         # remove zero scales + multiply non-zero ones by dt
         for key in list(self.reward_scales.keys()):
             scale = self.reward_scales[key]
-            print(key, scale)
+            # print(key, scale)
             if scale == 0:
                 self.reward_scales.pop(key)
             else:
@@ -1627,6 +1629,22 @@ class LeggedRobot(BaseTask):
         self.video_frames_eval = []
         self.complete_video_frames = []
         self.complete_video_frames_eval = []
+
+        print("self.dof_names: ", self.dof_names)
+        print("self.num_dofs: ", self.num_dofs)
+        print("body_names: ", body_names)
+        print("self.num_bodies: ", self.num_bodies)
+
+        print("penalized_contact_names: ", penalized_contact_names)
+        print("termination_contact_names: ", termination_contact_names)
+        print("feet_names: ", feet_names)
+
+        
+        print("self.feet_indices: ", self.feet_indices)
+        print("self.penalised_contact_indices: ", self.penalised_contact_indices)
+        print("self.termination_contact_indices: ", self.termination_contact_indices)
+
+ 
 
     def render(self, mode="rgb_array"):
         assert mode == "rgb_array"

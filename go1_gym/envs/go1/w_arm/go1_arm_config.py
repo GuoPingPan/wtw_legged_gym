@@ -1,5 +1,5 @@
 from typing import Union
-
+import numpy as np
 from params_proto import Meta
 
 from go1_gym.envs.base.legged_robot_config import Cfg, RunnerArgs
@@ -27,20 +27,31 @@ class Go1ArmCfg(Cfg):
     class init_state(Cfg.init_state):
         pos = [0.0, 0.0, 0.34]  # x,y,z [m]
         default_joint_angles = {  # = target angles [rad] when action = 0.0
-        'FL_hip_joint': 0.1,  # [rad]
-        'RL_hip_joint': 0.1,  # [rad]
-        'FR_hip_joint': -0.1,  # [rad]
-        'RR_hip_joint': -0.1,  # [rad]
+            'FL_hip_joint': 0.1,  # [rad]
+            'RL_hip_joint': 0.1,  # [rad]
+            'FR_hip_joint': -0.1,  # [rad]
+            'RR_hip_joint': -0.1,  # [rad]
 
-        'FL_thigh_joint': 0.8,  # [rad]
-        'RL_thigh_joint': 1.,  # [rad]
-        'FR_thigh_joint': 0.8,  # [rad]
-        'RR_thigh_joint': 1.,  # [rad]
+            'FL_thigh_joint': 0.8,  # [rad]
+            'RL_thigh_joint': 1.,  # [rad]
+            'FR_thigh_joint': 0.8,  # [rad]
+            'RR_thigh_joint': 1.,  # [rad]
 
-        'FL_calf_joint': -1.5,  # [rad]
-        'RL_calf_joint': -1.5,  # [rad]
-        'FR_calf_joint': -1.5,  # [rad]
-        'RR_calf_joint': -1.5  # [rad]
+            'FL_calf_joint': -1.5,  # [rad]
+            'RL_calf_joint': -1.5,  # [rad]
+            'FR_calf_joint': -1.5,  # [rad]
+            'RR_calf_joint': -1.5,  # [rad]
+            
+            'joint_gripper_right': 0.,
+            'joint_gripper_left': 0.,
+            'joint_6': 0.,
+            'joint_5': 0.,
+            'joint_4': 0.,
+            # 'joint_3': -1.3,
+            # 'joint_2': 1.4,
+            'joint_3': -.5,
+            'joint_2': .6,
+            'joint_1': 0.,
         }
 
     class control(Cfg.control):
@@ -56,7 +67,7 @@ class Go1ArmCfg(Cfg):
         decimation = 4
 
     class asset(Cfg.asset):
-        file = '{MINI_GYM_ROOT_DIR}/resources/robots/go1/urdf/go1.urdf'
+        file = '{MINI_GYM_ROOT_DIR}/resources/robots/go1_arm/urdf/go1_arm.urdf'
         foot_name = "foot"
         penalize_contacts_on = ["thigh", "calf"]
         terminate_after_contacts_on = ["base"]
@@ -70,40 +81,51 @@ class Go1ArmCfg(Cfg):
         kappa_gait_probs = 0.07
         gait_force_sigma = 100.
         gait_vel_sigma = 10.
-        reward_container_name = "CoRLRewards"
-        only_positive_rewards = False
-        only_positive_rewards_ji22_style = True
+        reward_container_name = "ICRARewards"
+        only_positive_rewards = True
+        only_positive_rewards_ji22_style = False
         sigma_rew_neg = 0.02
 
     class reward_scales(Cfg.reward_scales):
+        # TODO
+        manip_commands_tracking = 0.5
+        loco_angular_commands_tracking = 0.15
+        loco_velocity_commands_tracking = -0.5
+        manip_energy = -0.004
+        loco_energy = -0.00005
+        alive = 1.
+
         torques = -0.0001
         action_rate = -0.01
         dof_pos_limits = -10.0
 
+        tracking_ang_vel = 0. # TODO
+        tracking_lin_vel = 0. # TODO
+
         feet_contact_forces = 0.0
-        feet_slip = -0.04
+        feet_slip = -0.0 # TODO
         action_smoothness_1 = -0.1
         action_smoothness_2 = -0.1
         dof_vel = -1e-4
         dof_pos = -0.0
-        jump = 10.0
+        jump = 0.0 # TODO
         base_height = 0.0
         estimation_bonus = 0.0
-        raibert_heuristic = -10.0
+        raibert_heuristic = -0.0 # TODO
         feet_impact_vel = -0.0
         feet_clearance = -0.0
         feet_clearance_cmd = -0.0
-        feet_clearance_cmd_linear = -30.0
+        feet_clearance_cmd_linear = -0.0 # TODO
         orientation = 0.0
-        orientation_control = -5.0
-        tracking_stance_width = -0.0
-        tracking_stance_length = -0.0
+        orientation_control = -0.0 # TODO
+        tracking_stance_width = -0.0 
+        tracking_stance_length = -0.0 
         lin_vel_z = -0.02
         ang_vel_xy = -0.001
         feet_air_time = 0.0
         hop_symmetry = 0.0
-        tracking_contacts_shaped_force = 4.0
-        tracking_contacts_shaped_vel = 4.0
+        tracking_contacts_shaped_force = 0.0 # TODO
+        tracking_contacts_shaped_vel = 0.0 # TODO
         collision = -5.0
 
     class terrain(Cfg.terrain):
@@ -138,7 +160,16 @@ class Go1ArmCfg(Cfg):
         ground_friction_range = [0, 1]
         clip_actions = 10.0
 
+    class noise(Cfg.noise):
+        add_noise = False
+        noise_level = 1.0  # scales other values
+
     class env(Cfg.env):
+        num_actions = 15
+        num_actions_loco = 12
+        num_actions_arm = 3
+        keep_arm_fixed = True
+
         observe_vel = False
         num_envs = 4000
 
@@ -166,22 +197,34 @@ class Go1ArmCfg(Cfg):
         num_observation_history = 30
         observe_two_prev_actions = True
         observe_yaw = False
-        num_observations = 70
+        num_observations = 73 # TODO
         num_scalar_observations = 70
-        observe_gait_commands = True
+        observe_gait_commands = False
         observe_timing_parameter = False
         observe_clock_inputs = True
 
 
     class commands(Cfg.commands):
+        # TODO 
+        lin_vel_x = [0, 0.9] # 只有向前的速度？
+        ang_vel_yaw = [-1.0, 1.0]
+        # l = [0.5, 0.52]
+        # p = [np.pi /3 - 0.05, np.pi /3 ]
+        # y = [-np.pi /3 - 0.05, -np.pi /3 ]
+        l = [0.2, 0.7]
+        p = [-2. *np.pi /5 , 2.*np.pi/5]
+        y = [-3. *np.pi /5 , 3.*np.pi/5]
+        T_traj = [1., 3.]
+
         heading_command = False
-        command_curriculum = True
+        command_curriculum = False # TODO
    
 
         num_lin_vel_bins = 30
         num_ang_vel_bins = 30
         distributional_commands = True
-        num_commands = 15
+        num_commands = 6 # TODO
+        num_commands_arm = 3 # TODO
         resampling_time = 10.
         lin_vel_x = [-1.0, 1.0]
         lin_vel_y = [-0.6, 0.6]
@@ -227,7 +270,9 @@ class Go1ArmCfg(Cfg):
         exclusive_phase_offset = False
         pacing_offset = False
         binary_phases = True
-        gaitwise_curricula = True
+        gaitwise_curricula = False # TODO
+
+
 
 
     class curriculum_thresholds(Cfg.curriculum_thresholds):
@@ -243,7 +288,7 @@ class Go1ArmCfg(Cfg):
         Kd_factor_range = [0.5, 1.5]
 
         lag_timesteps = 6
-        randomize_lag_timesteps = True
+        randomize_lag_timesteps = False # TODO
         randomize_rigids_after_start = False
         randomize_friction_indep = False
         randomize_friction = True
