@@ -215,8 +215,8 @@ class Go1Arm(LeggedRobot):
         super().compute_observations()
 
         # TODO
-        self.privileged_obs_buf = torch.cat((self.privileged_obs_buf, self.end_effector_state), dim=1)
-        self.next_privileged_obs_buf = torch.cat((self.next_privileged_obs_buf, self.end_effector_state), dim=1)
+        self.privileged_obs_buf = torch.cat((self.privileged_obs_buf, self.end_effector_state[:, :3]), dim=1)
+        self.next_privileged_obs_buf = torch.cat((self.next_privileged_obs_buf, self.end_effector_state[:, :3]), dim=1)
         
         assert self.privileged_obs_buf.shape[
             1] == self.cfg.env.num_privileged_obs, f"num_privileged_obs ({self.cfg.env.num_privileged_obs}) != the number of privileged observations ({self.privileged_obs_buf.shape[1]}), you will discard data from the student!"

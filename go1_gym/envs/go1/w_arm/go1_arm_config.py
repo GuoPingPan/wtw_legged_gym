@@ -65,7 +65,7 @@ class Go1ArmCfg(Cfg):
         hip_scale_reduction = 0.5
         # decimation: Number of control action updates @ sim DT per policy DT
         decimation = 4
-        stiffness_leg = {'joint': 50.}  # [N*m/rad]
+        stiffness_leg = {'joint': 30.}  # [N*m/rad]
         damping_leg = {'joint': 1.}  # [N*m*s/rad]
         stiffness_arm = {'joint': 5.}  # [N*m/rad]
         damping_arm = {'joint': 0.5}  # [N*m*s/rad]
@@ -82,7 +82,7 @@ class Go1ArmCfg(Cfg):
 
     class rewards(Cfg.rewards):
         soft_dof_pos_limit = 0.9
-        base_height_target = 0.30
+        base_height_target = 0.50
         kappa_gait_probs = 0.07
         gait_force_sigma = 100.
         gait_vel_sigma = 10.
@@ -105,7 +105,7 @@ class Go1ArmCfg(Cfg):
         manip_energy = -0.004
         loco_energy = -0.00005
         alive = 1.
-        base_height = -0.0
+        base_height = -0.5
         dof_acc = -0.
 
         torques = -0.000
@@ -115,14 +115,13 @@ class Go1ArmCfg(Cfg):
         tracking_ang_vel = 0. # TODO
         tracking_lin_vel = 0. # TODO
 
-        feet_contact_forces = 0.0
+        feet_contact_forces = 0.00
         feet_slip = -0.0 # TODO
         # action_smoothness_1 = -0.1
         # action_smoothness_2 = -0.1
         dof_vel = -0.
         dof_pos = -0.0
         jump = 0.0 # TODO
-        base_height = 0.0
         estimation_bonus = 0.0
         raibert_heuristic = -0.0 # TODO
         feet_impact_vel = -0.0
@@ -139,7 +138,7 @@ class Go1ArmCfg(Cfg):
         hop_symmetry = 0.0
         tracking_contacts_shaped_force = 0.0 # TODO
         tracking_contacts_shaped_vel = 0.0 # TODO
-        collision = -.0
+        collision = -5.0
 
     class terrain(Cfg.terrain):
         measure_heights = False
@@ -187,9 +186,9 @@ class Go1ArmCfg(Cfg):
         priv_observe_friction_indep = False
         priv_observe_friction = True
         priv_observe_restitution = True
-        priv_observe_base_mass = False
-        priv_observe_gravity = False
-        priv_observe_com_displacement = False
+        priv_observe_base_mass = True
+        priv_observe_gravity = True
+        priv_observe_com_displacement = True
         priv_observe_ground_friction = False
         priv_observe_ground_friction_per_foot = False
         priv_observe_motor_strength = False
@@ -197,12 +196,12 @@ class Go1ArmCfg(Cfg):
         priv_observe_Kp_factor = False
         priv_observe_Kd_factor = False
         priv_observe_body_velocity = False
-        priv_observe_body_height = False
+        priv_observe_body_height = True
         priv_observe_desired_contact_states = False
-        priv_observe_contact_forces = False
+        priv_observe_contact_forces = True
         priv_observe_foot_displacement = False
         priv_observe_gravity_transformed_foot_displacement = False
-        num_privileged_obs = 15 # TODO
+        num_privileged_obs = 13 # TODO
         num_observation_history = 30
         observe_two_prev_actions = True
         observe_yaw = False
@@ -217,15 +216,15 @@ class Go1ArmCfg(Cfg):
         # TODO 
         lin_vel_x = [0, 0.9] # 只有向前的速度？
         ang_vel_yaw = [-1.0, 1.0]
-        l = [0.5, 0.52]
-        p = [np.pi /3 - 0.05, np.pi /3 ]
-        y = [-0.05, 0.]
-        T_traj = [2.9, 3.]
+        # l = [0.5, 0.52]
+        # p = [np.pi /3 - 0.05, np.pi /3 ]
+        # y = [-0.05, 0.]
+        # T_traj = [2.9, 3.]
 
-        # l = [0.2, 0.7]
-        # p = [-2. *np.pi /5 , 2.*np.pi/5]
-        # y = [-3. *np.pi /5 , 3.*np.pi/5]
-        # T_traj = [1., 3.]
+        l = [0.2, 0.7]
+        p = [-2. *np.pi /5 , 2.*np.pi/5]
+        y = [-3. *np.pi /5 , 3.*np.pi/5]
+        T_traj = [1., 3.]
 
         heading_command = False
         command_curriculum = False # TODO

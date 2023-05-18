@@ -7,11 +7,11 @@ from torch.distributions import Normal
 class AC_Args(PrefixProto, cli=False):
     # policy
     init_noise_std = 1.0
-    actor_hidden_dims = [512, 256, 256]
-    critic_hidden_dims = [512, 256, 256]
+    actor_hidden_dims = [512, 256, 128]
+    critic_hidden_dims = [512, 256, 128]
     activation = 'elu'  # can be elu, relu, selu, crelu, lrelu, tanh, sigmoid
 
-    adaptation_module_branch_hidden_dims = [256, 256]
+    adaptation_module_branch_hidden_dims = [256, 128]
 
     use_decoder = False
 

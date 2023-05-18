@@ -43,12 +43,13 @@ caches = DataCaches(1)
 
 class Runner:
 
-    def __init__(self, env, runner_args: RunnerArgs, device='cpu'):
+    def __init__(self, env, runner_args: RunnerArgs, run_name: str=None, device='cpu'):
         from .ppo import PPO
 
         self.device = device
         self.env = env
         self.runner_args = runner_args
+        self.run_name = run_name
 
         actor_critic = ActorCritic(self.env.num_obs,
                                       self.env.num_privileged_obs,
@@ -211,7 +212,7 @@ class Runner:
             self.tot_timesteps += self.num_steps_per_env * self.env.num_envs
             if logger.every(self.runner_args.log_freq, "iteration", start_on=1):
                 # if it % Config.log_freq == 0:
-                logger.log_metrics_summary(key_values={"timesteps": self.tot_timesteps, "iterations": it})
+                logger.log_metrics_summary(key_values={"timesteps": self.tot_timesteps, "iterations": it, "run_name": self.run_name})
                 logger.job_running()
 
             if it % self.runner_args.save_interval == 0:

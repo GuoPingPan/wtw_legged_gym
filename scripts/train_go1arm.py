@@ -26,7 +26,7 @@ def train_go1(args):
 
   env = HistoryWrapper(env)
   gpu_id = args.sim_device.split(":")[-1]
-  runner = Runner(env, runner_args=Go1ArmRunnerArgs, device=f"cuda:{gpu_id}")
+  runner = Runner(env, runner_args=Go1ArmRunnerArgs, run_name=args.run_name, device=f"cuda:{gpu_id}")
   runner.learn(num_learning_iterations=args.num_learning_iterations, init_at_random_ep_len=True, eval_freq=args.eval_freq)
 
 
@@ -42,13 +42,13 @@ if __name__ == '__main__':
   parser.add_argument('--num_learning_iterations', type=int, default=100000)
   parser.add_argument('--eval_freq', type=int, default=100)
   parser.add_argument('--num_envs', type=int, default=4096)
-  parser.add_argument('--run_names', type=str, default='gait-conditioned-agility')
+  parser.add_argument('--run_name', type=str, default='gait-conditioned-agility')
 
   args = parser.parse_args()
   
 
   stem = Path(__file__).stem
-  logger.configure(logger.utcnow(f'{args.run_names}/%Y-%m-%d/{stem}/%H%M%S.%f'),
+  logger.configure(logger.utcnow(f'{args.run_name}/%Y-%m-%d/{stem}/%H%M%S.%f'),
                     root=Path(f"{MINI_GYM_ROOT_DIR}/runs").resolve(), )
   logger.log_text("""
               charts: 

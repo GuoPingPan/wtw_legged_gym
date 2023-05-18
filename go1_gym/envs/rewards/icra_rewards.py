@@ -161,6 +161,10 @@ class ICRARewards:
 
     def _reward_feet_contact_forces(self):
         # penalize high contact forces
+
+        # print("contact force:", torch.sum((torch.norm(self.env.contact_forces[:, self.env.feet_indices, :],
+        #                              dim=-1) - self.env.cfg.rewards.max_contact_force).clip(min=0.), dim=1))
+
         return torch.sum((torch.norm(self.env.contact_forces[:, self.env.feet_indices, :],
                                      dim=-1) - self.env.cfg.rewards.max_contact_force).clip(min=0.), dim=1)
 
