@@ -32,7 +32,7 @@ class ICRARewards:
 
         # print("lpy_error: ", torch.exp(-2*lpy_error))
 
-        return torch.exp(-2*lpy_error)
+        return torch.exp(-lpy_error)
 
     def _reward_loco_angular_commands_tracking(self):
 
@@ -40,7 +40,7 @@ class ICRARewards:
 
         # print("yaw_vel_error: ", torch.exp(-2*yaw_vel_error))
 
-        return torch.exp(-2*yaw_vel_error)
+        return torch.exp(-yaw_vel_error)
 
     def _reward_loco_velocity_commands_tracking(self):
         vx_error = torch.abs(self.env.base_lin_vel[:, 0] - self.env.commands[:, 0])
@@ -49,6 +49,7 @@ class ICRARewards:
         # print("vx_error: ",  torch.exp(-3*vx_error))
 
         return torch.exp(-3*vx_error)
+        # return vx_error
 
     def _reward_base_height(self):
         # Penalize base height away from target

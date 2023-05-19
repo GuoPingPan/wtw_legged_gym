@@ -101,11 +101,12 @@ class Go1ArmCfg(Cfg):
         # TODO
         manip_commands_tracking = 0.5
         loco_angular_commands_tracking = 0.15
+        # loco_velocity_commands_tracking = -0.5
         loco_velocity_commands_tracking = 0.5
         manip_energy = -0.004
         loco_energy = -0.00005
         alive = 1.
-        base_height = -0.5
+        # base_height = -0.5
         dof_acc = -0.
 
         torques = -0.000
@@ -149,7 +150,7 @@ class Go1ArmCfg(Cfg):
 
         yaw_init_range = 3.14
         border_size = 0.0
-        mesh_type = "trimesh"
+        mesh_type = "plane"
         num_cols = 30
         num_rows = 30
         terrain_width = 5.0
@@ -310,7 +311,7 @@ class Go1ArmCfg(Cfg):
         friction_range = [0.1, 3.0]
         randomize_restitution = True
         restitution_range = [0.0, 0.4]
-        randomize_base_mass = False # TODO
+        randomize_base_mass = True # TODO
         added_mass_range = [-1.0, 3.0]
         randomize_gravity = True
         gravity_range = [-1.0, 1.0]

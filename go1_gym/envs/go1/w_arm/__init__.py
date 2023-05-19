@@ -64,7 +64,7 @@ class Go1Arm(LeggedRobot):
                                         gymtorch.unwrap_tensor(self.dof_state))
 
         # HACK(pgp) fixed based height
-        # self.root_states[:, 2] = 0.28
+        # self.root_states[:, 2] = 0.30 + self.measured_heights
         # self.gym.set_actor_root_state_tensor(self.sim,
         #                                       gymtorch.unwrap_tensor(self.root_states))
 
@@ -381,8 +381,8 @@ class Go1Arm(LeggedRobot):
             + torch.sin(yaw) * (self.end_effector_state[env_ids, 1] - self.root_states[env_ids, 1])
         y = -torch.sin(yaw) * (self.end_effector_state[env_ids, 0] - self.root_states[env_ids, 0]) \
             + torch.cos(yaw) * (self.end_effector_state[env_ids, 1] - self.root_states[env_ids, 1])
-        z = self.end_effector_state[env_ids, 2] - self.root_states[env_ids, 2]
-
+        # z = self.end_effector_state[env_ids, 2] - self.root_states[env_ids, 2]
+        z = self.end_effector_state[env_ids, 2] - 0.53
         l = torch.sqrt(x**2 + y**2 + z**2)
         p = torch.atan2(torch.sqrt(x**2 + y**2), z)
         y = torch.atan2(y, x)
