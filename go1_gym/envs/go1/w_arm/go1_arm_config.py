@@ -16,11 +16,11 @@ class Go1ArmRunnerArgs(RunnerArgs):
     log_freq = 10
 
     # load and resume
-    resume = False
+    resume = True
     load_run = -1  # -1 = last run
     checkpoint = -1  # -1 = last saved model
-    resume_path = None  # updated from load_run and chkpt
-    resume_curriculum = True
+    resume_path = "/home/yzc1/workspace/wtw/walk-these-ways/runs/planekp20/2023-05-19/train_go1arm/063503.799917"  # updated from load_run and chkpt
+    resume_curriculum = False
 
 
 class Go1ArmCfg(Cfg):
@@ -65,7 +65,7 @@ class Go1ArmCfg(Cfg):
         hip_scale_reduction = 0.5
         # decimation: Number of control action updates @ sim DT per policy DT
         decimation = 4
-        stiffness_leg = {'joint': 30.}  # [N*m/rad]
+        stiffness_leg = {'joint': 20.}  # [N*m/rad]
         damping_leg = {'joint': 1.}  # [N*m*s/rad]
         stiffness_arm = {'joint': 5.}  # [N*m/rad]
         damping_arm = {'joint': 0.5}  # [N*m*s/rad]

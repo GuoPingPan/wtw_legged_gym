@@ -60,7 +60,7 @@ class Runner:
         if self.runner_args.resume:
             # load pretrained weights from resume_path
             from ml_logger import ML_Logger
-            loader = ML_Logger(root="http://escher.csail.mit.edu:8080",
+            loader = ML_Logger(root="file://",
                                prefix=self.runner_args.resume_path)
             
             # NOTE 自动加载最新的模型，重点是 resume_path 
