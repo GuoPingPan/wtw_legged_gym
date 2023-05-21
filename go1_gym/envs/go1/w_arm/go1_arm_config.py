@@ -82,7 +82,7 @@ class Go1ArmCfg(Cfg):
 
     class rewards(Cfg.rewards):
         soft_dof_pos_limit = 0.9
-        base_height_target = 0.50
+        base_height_target = 0.25
         kappa_gait_probs = 0.07
         gait_force_sigma = 100.
         gait_vel_sigma = 10.
@@ -93,9 +93,11 @@ class Go1ArmCfg(Cfg):
 
         use_terminal_foot_height = False
         use_terminal_body_height = True
-        terminal_body_height = 0.18
+        terminal_body_height = 0.28
         use_terminal_roll_pitch = True
-        terminal_body_ori = 1.6
+        # terminal_body_ori = 1.6
+        terminal_body_ori = 0.2
+        terminal_body_pitch = 0.2
 
     class reward_scales(Cfg.reward_scales):
         # TODO
@@ -150,7 +152,7 @@ class Go1ArmCfg(Cfg):
 
         yaw_init_range = 3.14
         border_size = 0.0
-        mesh_type = "plane"
+        mesh_type = "trimesh"
         num_cols = 30
         num_rows = 30
         terrain_width = 5.0

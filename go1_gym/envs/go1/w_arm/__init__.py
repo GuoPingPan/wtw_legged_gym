@@ -68,6 +68,23 @@ class Go1Arm(LeggedRobot):
         # self.gym.set_actor_root_state_tensor(self.sim,
         #                                       gymtorch.unwrap_tensor(self.root_states))
 
+    def check_termination(self):
+        super().check_termination()
+
+        if self.cfg.rewards.use_terminal_roll_pitch:
+            roll_vec = quat_apply(self.base_quat, self.roll_vec) # [0,1,0]
+            roll = torch.atan2(roll_vec[:, 2], roll_vec[:, 1]) # roll angle = arctan2(z, y)
+            pitch_vec = quat_apply(self.base_quat, self.pitch_vec) # [0,1,0]
+            pitch = torch.atan2(pitch_vec[:, 0], pitch_vec[:, 2]) # pitch angle = arctan2(x, z)
+            reverse_buf1 = torch.logical_and(roll > self.cfg.rewards.terminal_body_ori, self.commands[:, 4] > 0.0) # lpy
+            reverse_buf2 = torch.logical_and(roll < -self.cfg.rewards.terminal_body_ori, self.commands[:, 4] < 0.0) # lpy
+            reverse_buf3 = torch.logical_and(roll > self.cfg.rewards.terminal_body_pitch, self.commands[:, 3] > 0.0) # lpy
+            reverse_buf4 = torch.logical_and(pitch < -self.cfg.rewards.terminal_body_pitch, self.commands[:, 3] < 0.0) # lpy
+            self.reverse_buf = reverse_buf1 | reverse_buf2 | reverse_buf3 | reverse_buf4
+
+        self.reset_buf |= self.reverse_buf
+
+
     def _compute_torques(self, actions):
         """ Compute torques from actions.
             Actions can be interpreted as position or velocity targets given to a PD controller, or directly as scaled torques.
@@ -152,6 +169,9 @@ class Go1Arm(LeggedRobot):
         
         # 加入DWB的约束
         self.end_effector_state = self.rigid_body_state.view(self.num_envs, self.num_bodies, 13)[:, 22] # link6
+        self.roll_vec = to_torch([0., 1., 0.], device=self.device).repeat((self.num_envs, 1))
+        self.pitch_vec = to_torch([0., 0., 1.], device=self.device).repeat((self.num_envs, 1))
+
 
         self.T_trajs = torch.zeros(self.num_envs, dtype=torch.float, device=self.device, requires_grad=False) # command 时间
         self.arm_commands_start = torch.zeros(self.num_envs, self.cfg.commands.num_commands_arm, dtype=torch.float, device=self.device, requires_grad=False) 
@@ -382,7 +402,7 @@ class Go1Arm(LeggedRobot):
         y = -torch.sin(yaw) * (self.end_effector_state[env_ids, 0] - self.root_states[env_ids, 0]) \
             + torch.cos(yaw) * (self.end_effector_state[env_ids, 1] - self.root_states[env_ids, 1])
         # z = self.end_effector_state[env_ids, 2] - self.root_states[env_ids, 2]
-        z = self.end_effector_state[env_ids, 2] - 0.53
+        z = self.end_effector_state[env_ids, 2] - self.cfg.rewards.base_height_target
         l = torch.sqrt(x**2 + y**2 + z**2)
         p = torch.atan2(torch.sqrt(x**2 + y**2), z)
         y = torch.atan2(y, x)
