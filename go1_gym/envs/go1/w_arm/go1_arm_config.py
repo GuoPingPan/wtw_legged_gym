@@ -82,7 +82,7 @@ class Go1ArmCfg(Cfg):
 
     class rewards(Cfg.rewards):
         soft_dof_pos_limit = 0.9
-        base_height_target = 0.25
+        base_height_target = 0.30
         kappa_gait_probs = 0.07
         gait_force_sigma = 100.
         gait_vel_sigma = 10.
@@ -108,7 +108,7 @@ class Go1ArmCfg(Cfg):
         manip_energy = -0.004
         loco_energy = -0.00005
         alive = 1.
-        # base_height = -0.5
+        base_height = -0.5
         dof_acc = -0.
 
         torques = -0.000

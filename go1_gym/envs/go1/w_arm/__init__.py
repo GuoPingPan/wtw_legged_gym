@@ -402,7 +402,7 @@ class Go1Arm(LeggedRobot):
         y = -torch.sin(yaw) * (self.end_effector_state[env_ids, 0] - self.root_states[env_ids, 0]) \
             + torch.cos(yaw) * (self.end_effector_state[env_ids, 1] - self.root_states[env_ids, 1])
         # z = self.end_effector_state[env_ids, 2] - self.root_states[env_ids, 2]
-        z = self.end_effector_state[env_ids, 2] - self.cfg.rewards.base_height_target
+        z = self.end_effector_state[env_ids, 2] - 0.5
         l = torch.sqrt(x**2 + y**2 + z**2)
         p = torch.atan2(torch.sqrt(x**2 + y**2), z)
         y = torch.atan2(y, x)
