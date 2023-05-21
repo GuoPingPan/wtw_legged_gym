@@ -16,7 +16,7 @@ class Go1ArmRunnerArgs(RunnerArgs):
     log_freq = 10
 
     # load and resume
-    resume = True
+    resume = False
     load_run = -1  # -1 = last run
     checkpoint = -1  # -1 = last saved model
     resume_path = "/home/yzc1/workspace/wtw/walk-these-ways/runs/planekp20/2023-05-19/train_go1arm/063503.799917"  # updated from load_run and chkpt
