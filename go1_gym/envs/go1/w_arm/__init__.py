@@ -74,11 +74,11 @@ class Go1Arm(LeggedRobot):
         if self.cfg.rewards.use_terminal_roll_pitch:
             roll_vec = quat_apply(self.base_quat, self.roll_vec) # [0,1,0]
             roll = torch.atan2(roll_vec[:, 2], roll_vec[:, 1]) # roll angle = arctan2(z, y)
-            pitch_vec = quat_apply(self.base_quat, self.pitch_vec) # [0,1,0]
+            pitch_vec = quat_apply(self.base_quat, self.pitch_vec) # [0,0,1]
             pitch = torch.atan2(pitch_vec[:, 0], pitch_vec[:, 2]) # pitch angle = arctan2(x, z)
             reverse_buf1 = torch.logical_and(roll > self.cfg.rewards.terminal_body_ori, self.commands[:, 4] > 0.0) # lpy
             reverse_buf2 = torch.logical_and(roll < -self.cfg.rewards.terminal_body_ori, self.commands[:, 4] < 0.0) # lpy
-            reverse_buf3 = torch.logical_and(roll > self.cfg.rewards.terminal_body_pitch, self.commands[:, 3] > 0.0) # lpy
+            reverse_buf3 = torch.logical_and(pitch > self.cfg.rewards.terminal_body_pitch, self.commands[:, 3] > 0.0) # lpy
             reverse_buf4 = torch.logical_and(pitch < -self.cfg.rewards.terminal_body_pitch, self.commands[:, 3] < 0.0) # lpy
             self.reverse_buf = reverse_buf1 | reverse_buf2 | reverse_buf3 | reverse_buf4
 
@@ -404,7 +404,7 @@ class Go1Arm(LeggedRobot):
         # z = self.end_effector_state[env_ids, 2] - self.root_states[env_ids, 2]
         z = self.end_effector_state[env_ids, 2] - 0.5
         l = torch.sqrt(x**2 + y**2 + z**2)
-        p = torch.atan2(torch.sqrt(x**2 + y**2), z)
+        p = torch.atan2(z, torch.sqrt(x**2 + y**2)) # NOTE 这里的角度是否有问题？
         y = torch.atan2(y, x)
 
         return torch.stack([l, p, y], dim=-1)

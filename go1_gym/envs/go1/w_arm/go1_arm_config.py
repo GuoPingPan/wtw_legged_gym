@@ -96,8 +96,8 @@ class Go1ArmCfg(Cfg):
         terminal_body_height = 0.28
         use_terminal_roll_pitch = True
         # terminal_body_ori = 1.6
-        terminal_body_ori = 0.2
-        terminal_body_pitch = 0.2
+        terminal_body_ori = 0.35
+        terminal_body_pitch = 0.35
 
     class reward_scales(Cfg.reward_scales):
         # TODO
@@ -152,7 +152,7 @@ class Go1ArmCfg(Cfg):
 
         yaw_init_range = 3.14
         border_size = 0.0
-        mesh_type = "trimesh"
+        mesh_type = "plane"
         num_cols = 30
         num_rows = 30
         terrain_width = 5.0

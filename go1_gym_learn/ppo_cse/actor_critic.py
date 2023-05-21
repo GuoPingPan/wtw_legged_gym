@@ -30,6 +30,7 @@ class ActorCritic(nn.Module):
         self.decoder = AC_Args.use_decoder
         super().__init__()
 
+        # NOTE self.obs_history_length * self.env.num_obs
         self.num_obs_history = num_obs_history
         self.num_privileged_obs = num_privileged_obs
 
