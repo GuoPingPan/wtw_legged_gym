@@ -361,7 +361,7 @@ class LeggedRobot(BaseTask):
         #                               self.desired_contact_states), dim=-1)
 
         if self.cfg.env.observe_vel:
-            if self.cfg.commands.global_reference:
+            if self.cfg.commands.global_reference: # NOTE 这是全局坐标系的速度表达
                 self.obs_buf = torch.cat((self.root_states[:self.num_envs, 7:10] * self.obs_scales.lin_vel,
                                           self.base_ang_vel * self.obs_scales.ang_vel,
                                           self.obs_buf), dim=-1)

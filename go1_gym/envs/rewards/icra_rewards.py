@@ -50,6 +50,9 @@ class ICRARewards:
 
         return torch.exp(-3*vx_error)
         # return vx_error
+    
+    def _reward_penal_vel_y(self):
+        return torch.sum(torch.square(self.env.base_lin_vel[:, 1].unsqueeze(-1)), dim=1)
 
     def _reward_base_height(self):
         # Penalize base height away from target
