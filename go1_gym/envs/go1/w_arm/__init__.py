@@ -82,6 +82,8 @@ class Go1Arm(LeggedRobot):
             reverse_buf2 = torch.logical_and(roll < -self.cfg.rewards.terminal_body_ori, self.commands[:, 4] < 0.0) # lpy
             self.reverse_buf |= reverse_buf1 | reverse_buf2
 
+            print("roll: ", roll)
+
         if self.cfg.rewards.use_terminal_pitch:
             pitch_vec = quat_apply(self.base_quat, self.pitch_vec) # [0,0,1]
             pitch = torch.atan2(pitch_vec[:, 0], pitch_vec[:, 2]) # pitch angle = arctan2(x, z)
@@ -89,8 +91,10 @@ class Go1Arm(LeggedRobot):
             reverse_buf4 = torch.logical_and(pitch < -self.cfg.rewards.terminal_body_pitch, self.commands[:, 3] < 0.0) # lpy
             self.reverse_buf |= reverse_buf3 | reverse_buf4
 
-        unreserse_buf = (self.arm_time_buf / (self.T_trajs / self.dt)) > 0.
-        self.reverse_buf = self.reverse_buf & unreserse_buf
+            print("pitch: ", pitch)
+
+        time_exceed_half = (self.arm_time_buf / (self.T_trajs / self.dt)) > 0.6
+        self.reverse_buf = self.reverse_buf & time_exceed_half
         self.reset_buf |= self.reverse_buf
 
 
@@ -414,9 +418,9 @@ class Go1Arm(LeggedRobot):
         z = self.end_effector_state[env_ids, 2] - 0.3
         l = torch.sqrt(x**2 + y**2 + z**2)
         p = torch.atan2(z, torch.sqrt(x**2 + y**2)) # NOTE 这里的角度是否有问题？
-        y = torch.atan2(y, x)
+        y_aw = torch.atan2(y, x)
 
-        return torch.stack([l, p, y], dim=-1)
+        return torch.stack([l, p, y_aw], dim=-1)
 
 
 

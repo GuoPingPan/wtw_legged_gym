@@ -110,7 +110,7 @@ class RCControllerProfile(CommandProfile):
         self.button_states = [0, 0, 0, 0]
 
     def get_command(self, t, probe=False):
-
+        # TODO
         command = self.state_estimator.get_command()
         command[0] = command[0] * self.x_scale
         command[1] = command[1] * self.y_scale

@@ -51,7 +51,9 @@ def get_rotation_matrix_from_rpy(rpy):
 class StateEstimator:
     def __init__(self, lc, use_cameras=True):
 
+        # TODO 这里是否需要调整一下？
         # reverse legs
+        # 控制的时候 FR为0，FL为1，RR为2，RL为3
         self.joint_idxs = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
         self.contact_idxs = [1, 0, 3, 2]
         # self.joint_idxs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -107,11 +109,12 @@ class StateEstimator:
         self.init_time = time.time()
         self.received_first_legdata = False
 
+        # 接收来自go1的传感器信息
         self.imu_subscription = self.lc.subscribe("state_estimator_data", self._imu_cb)
         self.legdata_state_subscription = self.lc.subscribe("leg_control_data", self._legdata_cb)
         self.rc_command_subscription = self.lc.subscribe("rc_command", self._rc_command_cb)
 
-        if use_cameras:
+        if use_cameras: # True
             for cam_id in [1, 2, 3, 4, 5]:
                 self.camera_subscription = self.lc.subscribe(f"camera{cam_id}", self._camera_cb)
             self.camera_names = ["front", "bottom", "left", "right", "rear"]
@@ -146,6 +149,7 @@ class StateEstimator:
         return self.euler
 
     def get_command(self):
+        # TODO 修改
         MODES_LEFT = ["body_height", "lat_vel", "stance_width"]
         MODES_RIGHT = ["step_frequency", "footswing_height", "body_pitch"]
 

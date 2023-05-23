@@ -11,6 +11,25 @@ class CoRLRewards:
     def load_env(self, env):
         self.env = env
 
+    # TODO remove
+    def _reward_feet_air_time(self):
+        # Reward long steps
+        # Need to filter the contacts because the contact reporting of PhysX is unreliable on meshes
+        contact = self.env.contact_forces[:, self.env.feet_indices, 2] > 1.
+        contact_filt = torch.logical_or(contact, self.env.last_contacts) 
+        self.env.last_contacts = contact
+        first_contact = (self.env.feet_air_time > 0.) * contact_filt
+        self.env.feet_air_time += self.env.dt
+        rew_airTime = torch.sum((self.env.feet_air_time - 0.5) * first_contact, dim=1) # reward only on first contact with the ground
+        rew_airTime *= torch.norm(self.env.commands[:, :2], dim=1) > 0.1 #no reward for zero command
+        self.env.feet_air_time *= ~contact_filt
+        return rew_airTime
+
+    def _reward_base_height(self):
+        # Penalize base height away from target
+        base_height = torch.mean(self.env.root_states[:, 2].unsqueeze(1) - self.env.measured_heights, dim=1)
+        return torch.square(base_height - self.env.cfg.rewards.base_height_target)
+
     # ------------ reward functions----------------
     def _reward_tracking_lin_vel(self):
         # Tracking of linear velocity commands (xy axes)

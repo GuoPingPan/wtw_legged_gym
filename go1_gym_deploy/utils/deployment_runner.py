@@ -45,6 +45,11 @@ class DeploymentRunner:
         self.logger.add_robot(name, agent.env.cfg)
 
     def add_control_agent(self, agent, name):
+        '''
+        :param agent: an agent that has a step() function
+        :param name: a string name for the agent 
+                    default: hardware_closed_loop
+        '''
         self.control_agent_name = name
         self.agents[name] = agent
         self.logger.add_robot(name, agent.env.cfg)
@@ -67,7 +72,7 @@ class DeploymentRunner:
         for agent_name in self.agents.keys():
             if hasattr(self.agents[agent_name], "get_obs"):
                 agent = self.agents[agent_name]
-                agent.get_obs()
+                agent.get_obs() # 更新观测
                 joint_pos = agent.dof_pos
                 if low:
                     final_goal = np.array([0., 0.3, -0.7,
@@ -79,6 +84,8 @@ class DeploymentRunner:
                 nominal_joint_pos = agent.default_dof_pos
 
                 print(f"About to calibrate; the robot will stand [Press R2 to calibrate]")
+
+                # 等待按键按下
                 while wait:
                     self.button_states = self.command_profile.get_buttons()
                     if self.command_profile.state_estimator.right_lower_right_switch_pressed:
@@ -88,6 +95,8 @@ class DeploymentRunner:
                 cal_action = np.zeros((agent.num_envs, agent.num_actions))
                 target_sequence = []
                 target = joint_pos - nominal_joint_pos
+
+                # NOTE 逐渐站起来
                 while np.max(np.abs(target - final_goal)) > 0.01:
                     target -= np.clip((target - final_goal), -0.05, 0.05)
                     target_sequence += [copy.deepcopy(target)]
@@ -100,14 +109,16 @@ class DeploymentRunner:
                         hip_reduction = agent.cfg.control.hip_scale_reduction
                         action_scale = agent.cfg.control.action_scale
 
+                    # NOTE 这里是为了抵消 publish 的放缩
                     next_target[[0, 3, 6, 9]] /= hip_reduction
                     next_target = next_target / action_scale
                     cal_action[:, 0:12] = next_target
                     agent.step(torch.from_numpy(cal_action))
                     agent.get_obs()
                     time.sleep(0.05)
-
                 print("Starting pose calibrated [Press R2 to start controller]")
+                
+                # 等待按键按下完成复位
                 while True:
                     self.button_states = self.command_profile.get_buttons()
                     if self.command_profile.state_estimator.right_lower_right_switch_pressed:
@@ -142,7 +153,7 @@ class DeploymentRunner:
             for i in range(max_steps):
 
                 policy_info = {}
-                action = self.policy(control_obs, policy_info)
+                action = self.policy(control_obs, policy_info) # info: latent 作为输出
 
                 for agent_name in self.agents.keys():
                     obs, ret, done, info = self.agents[agent_name].step(action)
@@ -218,5 +229,6 @@ class DeploymentRunner:
             control_obs = self.calibrate(wait=False)
             self.logger.save(self.log_filename)
 
+        # NOTE 学学
         except KeyboardInterrupt:
             self.logger.save(self.log_filename)

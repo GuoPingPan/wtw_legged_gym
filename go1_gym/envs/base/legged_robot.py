@@ -774,6 +774,7 @@ class LeggedRobot(BaseTask):
                             range(len(self.category_names))]
 
         # sample from new category curricula
+        # NOTE: 这里直接先获取num_commands，然后后面才根据步态进行计算
         for i, (category, env_ids_in_category, curriculum) in enumerate(
                 zip(self.category_names, category_env_ids, self.curricula)):
 
@@ -965,8 +966,8 @@ class LeggedRobot(BaseTask):
             self.joint_vel_last_last = torch.clone(self.joint_vel_last)
             self.joint_vel_last = torch.clone(self.joint_vel)
         elif control_type == "P":
-            torques = self.p_gains[:, :self.num_actions] * self.Kp_factors[:, :self.num_actions] * (
-                    self.joint_pos_target - self.dof_pos[:, :self.num_actions] + self.motor_offsets[:, :self.num_actions]) - self.d_gains[:, :self.num_actions] * self.Kd_factors[:, :self.num_actions] * self.dof_vel[:, :self.num_actions]
+            torques = self.p_gains * self.Kp_factors * (
+                    self.joint_pos_target - self.dof_pos + self.motor_offsets) - self.d_gains * self.Kd_factors * self.dof_vel
         else:
             raise NameError(f"Unknown controller type: {control_type}")
 
@@ -1770,7 +1771,7 @@ class LeggedRobot(BaseTask):
         
         # import ipdb; ipdb.set_trace()
         # NOTE 天坑，vars无法将继承的成员变量也进行输出
-        cfg.command_ranges = class_to_dict(cfg.commands)
+        cfg._ranges = class_to_dict(cfg.commands)
         if cfg.terrain.mesh_type not in ['heightfield', 'trimesh']:
             cfg.terrain.curriculum = False
         max_episode_length_s = cfg.env.episode_length_s

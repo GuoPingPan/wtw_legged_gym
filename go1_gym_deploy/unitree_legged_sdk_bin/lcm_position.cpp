@@ -136,6 +136,7 @@ void Custom::RobotControl()
 
     memcpy(&_keyData, &state.wirelessRemote[0], 40);
 
+    // TODO remote controller
     rc_command.left_stick[0] = _keyData.lx;
     rc_command.left_stick[1] = _keyData.ly;
     rc_command.right_stick[0] = _keyData.rx;

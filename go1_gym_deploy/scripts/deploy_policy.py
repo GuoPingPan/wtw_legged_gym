@@ -17,6 +17,7 @@ def load_and_run_policy(label, experiment_name, max_vel=1.0, max_yaw_vel=1.0):
     dirs = glob.glob(f"../../runs/{label}/*")
     logdir = sorted(dirs)[0]
 
+    # 加载参数
     with open(logdir+"/parameters.pkl", 'rb') as file:
         pkl_cfg = pkl.load(file)
         print(pkl_cfg.keys())
@@ -24,22 +25,23 @@ def load_and_run_policy(label, experiment_name, max_vel=1.0, max_yaw_vel=1.0):
         print(cfg.keys())
 
 
-    se = StateEstimator(lc)
+    se = StateEstimator(lc) # 接收传感器信息
 
     control_dt = 0.02
-    command_profile = RCControllerProfile(dt=control_dt, state_estimator=se, x_scale=max_vel, y_scale=0.6, yaw_scale=max_yaw_vel)
+    command_profile = RCControllerProfile(dt=control_dt, state_estimator=se, x_scale=max_vel, y_scale=0.6, yaw_scale=max_yaw_vel) # 计算 command
 
-    hardware_agent = LCMAgent(cfg, se, command_profile)
+    hardware_agent = LCMAgent(cfg, se, command_profile) # 充当环境，获取obs，进行step，并发布actions
     se.spin()
 
     from go1_gym_deploy.envs.history_wrapper import HistoryWrapper
     hardware_agent = HistoryWrapper(hardware_agent)
 
-    policy = load_policy(logdir)
+    policy = load_policy(logdir) # 计算actions
 
     # load runner
     root = f"{pathlib.Path(__file__).parent.resolve()}/../../logs/"
     pathlib.Path(root).mkdir(parents=True, exist_ok=True)
+    
     deployment_runner = DeploymentRunner(experiment_name=experiment_name, se=None,
                                          log_root=f"{root}/{experiment_name}")
     deployment_runner.add_control_agent(hardware_agent, "hardware_closed_loop")
